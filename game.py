@@ -4,85 +4,90 @@ import os, sys
 from sprites.bucket import Bucket
 from sprites.raindrop import Raindrop
 
-width, height = (800, 480)
+class Game:
+    def __init__(self):
+        self.width, self.height = (800, 480)
+        self.framerate = 60
 
-pygame.init()
-screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption('Raindrops')
+        pygame.init()
+        self.screen = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption('Raindrops')
 
-clock = pygame.time.Clock()
-running = True
+        self.clock = pygame.time.Clock()
+        self.running = True
 
-bucket = Bucket()
-bucket.set_location((width / 2,height - bucket.rect.height))
+        self.bucket = Bucket()
+        self.bucket.set_location((self.width / 2, self.height - self.bucket.rect.height))
 
-raindrops = [Raindrop()]
+        self.raindrops = [Raindrop()]
 
-score = 0
-speed_multiplier = 0
-loop_in_game_time = 0.0
-spawn_threshold = 1.0
+        self.score = 0
+        self.speed_multiplier = 0
+        self.loop_in_game_time = 0.0
+        self.spawn_threshold = 1.0
 
-def display_score():
-    font = pygame.font.Font('freesansbold.ttf', 20)
-    text = font.render('Score: ' + str(score), True, (255, 255, 255))
-    rect = text.get_rect()
-    rect.topleft = (10, 10)
-    screen.blit(text, rect)
+    def display_score(self):
+        font = pygame.font.Font('freesansbold.ttf', 20)
+        text = font.render('Score: ' + str(self.score), True, (255, 255, 255))
+        rect = text.get_rect()
+        rect.topleft = (10, 10)
+        self.screen.blit(text, rect)
 
-def process_score():
-    global speed_multiplier
-    if score < 0:
-        score = 0 # Temporary until we call game over
-    elif score % 10 == 0 and score / 10 > speed_multiplier:
-        speed_multiplier += 1
-        Raindrop.speed_base += 50
-        spawn_threshold -= .025
+    def process_score(self):
+        if self.score < 0:
+            self.score = 0 # Temporary until we call game over
+        elif self.score % 10 == 0 and self.score / 10 > self.speed_multiplier:
+            self.speed_multiplier += 1
+            Raindrop.speed_base += 50
+            self.spawn_threshold -= .025
 
-while running:
-    # Handle events
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit() # quit the screen
-            sys.exit()
-            running = False
+if __name__ == "__main__":
+    game = Game()
 
-    # Manage in-game time
-    loop_in_game_time += 1/60
-    if loop_in_game_time > spawn_threshold:
-        raindrops.append(Raindrop())
-        loop_in_game_time = 0
+    while game.running:
+        # Handle events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit() # quit the screen
+                sys.exit()
+                game.running = False
 
-    # Bucket moving
-    bucket.handle_keys() # For arrow keys
-    bucket.check_for_move() # For mouse or touch
-    for drop in raindrops:
-        drop.fall()
+        # Manage in-game time
+        game.loop_in_game_time += 1/60
+        if game.loop_in_game_time > game.spawn_threshold:
+            game.raindrops.append(Raindrop())
+            game.loop_in_game_time = 0
 
-    # Raindrop events
-    for drop in raindrops:
-        if drop.rect.colliderect(bucket.rect):
-            if drop.is_bad:
-                score -= score % 10
-            else:
-                score += 1
-            raindrops.remove(drop)
-            del drop
-        elif drop.rect.bottomleft[1] > height:
-            if not drop.is_bad:
-                score -= 1
-            raindrops.remove(drop)
-            del drop
+        # Bucket moving
+        game.bucket.handle_keys() # For arrow keys
+        game.bucket.check_for_move() # For mouse or touch
+        for drop in game.raindrops:
+            drop.fall()
 
-    # Drawing
-    screen.fill((0,0,0))
-    bucket.draw(screen)
-    for drop in raindrops:
-        drop.draw(screen)
+        # Raindrop events
+        for drop in game.raindrops:
+            if drop.rect.colliderect(game.bucket.rect):
+                if drop.is_bad:
+                    game.score -= game.score % 10
+                else:
+                    game.score += 1
+                game.raindrops.remove(drop)
+                del drop
+            elif drop.rect.bottomleft[1] > game.height:
+                if not drop.is_bad:
+                    game.score -= 1
+                game.raindrops.remove(drop)
+                del drop
 
-    # Manage score    
-    display_score()
-    process_score()
+        # Drawing
+        game.screen.fill((0,0,0))
+        game.bucket.draw(game.screen)
+        for drop in game.raindrops:
+            drop.draw(game.screen)
 
-    pygame.display.flip()
-    clock.tick(60)
+        # Manage score    
+        game.display_score()
+        game.process_score()
+
+        pygame.display.update()
+        game.clock.tick(game.framerate)
