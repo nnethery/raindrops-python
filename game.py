@@ -54,8 +54,8 @@ while running:
         loop_in_game_time = 0
 
     # Bucket moving
-    bucket.handle_keys()
-    bucket.check_for_move()
+    bucket.handle_keys() # For arrow keys
+    bucket.check_for_move() # For mouse or touch
     for drop in raindrops:
         drop.fall()
 
