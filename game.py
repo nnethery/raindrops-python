@@ -1,5 +1,5 @@
 import pygame
-import os, sys
+import sys
 
 from sprites.bucket import Bucket
 from sprites.raindrop import Raindrop
