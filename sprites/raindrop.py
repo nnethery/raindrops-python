@@ -5,7 +5,9 @@ image_files = ['images/droplet.png', 'images/bad droplet.png']
 class Raindrop(pygame.sprite.Sprite):
     speed_base = 200
 
-    def __init__(self, speed:int = 0, image_files:list = image_files, location:tuple = (50,50)):
+    def __init__(self, speed:int = 0, image_files:list = None, location:tuple = (50,50)):
+        if image_files is None:
+            image_files = image_files
         pygame.sprite.Sprite.__init__(self)
         self.is_bad = True if random.randrange(0,6) == 0 else False
         self.image = pygame.image.load(image_files[1]) if self.is_bad else pygame.image.load(image_files[0])
